@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoIP Lookup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+        }
+
+        .result-label {
+            font-weight: bold;
+        }
+
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GeoIP Lookup</h1>
+        
+        <div class="input-group">
+            <input type="text" id="ipInput" placeholder="Enter IP address (e.g., 8.8.8.8)" />
+            <button onclick="lookupIP()">Lookup</button>
+        </div>
+
+        <div class="loading" id="loading">Loading</div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <div class="result-item">
+                <div class="result-label">IP Address</div>
+                <div class="result-value" id="ip"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Country</div>
+                <div class="result-value" id="country"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Region</div>
+                <div class="result-value" id="region"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">City</div>
+                <div class="result-value" id="city"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Timezone</div>
+                <div class="result-value" id="timezone"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Coordinates</div>
+                <div class="result-value" id="coordinates"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ipInput = document.getElementById('ipInput');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const result = document.getElementById('result');
+
+        // Allow Enter key to trigger lookup
+        ipInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                lookupIP();
+            }
+        });
+
+        async function lookupIP() {
+            const ip = ipInput.value.trim();
+            
+            if (!ip) {
+                showError('Please enter an IP address');
+                return;
+            }
+
+            // Hide previous results and errors
+            hideResults();
+            hideError();
+            showLoading();
+
+            try {
+                const response = await fetch(`/api/ip/${ip}`);
+                const data = await response.json();
+
+                hideLoading();
+
+                if (!response.ok) {
+                    showError(data.error || 'Failed to lookup IP address');
+                    return;
+                }
+
+                // Display results
+                document.getElementById('ip').textContent = data.ip;
+                document.getElementById('country').textContent = data.country || 'N/A';
+                document.getElementById('region').textContent = data.region || 'N/A';
+                document.getElementById('city').textContent = data.city || 'N/A';
+                document.getElementById('timezone').textContent = data.timezone || 'N/A';
+                document.getElementById('coordinates').textContent = 
+                    `${data.coordinates.latitude}, ${data.coordinates.longitude}`;
+
+                showResults();
+            } catch (err) {
+                hideLoading();
+                showError('Network error: ' + err.message);
+            }
+        }
+
+        function showLoading() {
+            loading.classList.add('show');
+        }
+
+        function hideLoading() {
+            loading.classList.remove('show');
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.classList.add('show');
+        }
+
+        function hideError() {
+            error.classList.remove('show');
+        }
+
+        function showResults() {
+            result.classList.add('show');
+        }
+
+        function hideResults() {
+            result.classList.remove('show');
+        }
+    </script>
+</body>
+</html>
+
