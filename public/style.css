@@ -75,30 +75,28 @@ button:active {
 }
 
 .result.show {
-  display: block;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 12px;
+  align-items: center;
 }
 
 .result-item {
-  margin-bottom: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #4a4a4a;
-}
-
-.result-item:last-child {
-  margin-bottom: 0;
-  border-bottom: none;
+  display: contents;
 }
 
 .result-label {
   font-weight: bold;
   color: #00d4ff;
-  margin-bottom: 4px;
   font-size: 13px;
+  padding: 8px 0;
 }
 
 .result-value {
   color: #ffffff;
   font-size: 14px;
+  padding: 4px 0;
+  word-break: break-word;
 }
 
 .error {
